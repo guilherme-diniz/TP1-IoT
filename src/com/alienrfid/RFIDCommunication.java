@@ -22,6 +22,11 @@ public class RFIDCommunication {
         reader.setUsername("alien");
         reader.setPassword("password");
 
+        reader.setNotifyAddress("150.164.0.249:4000");
+        reader.setNotifyTime(30);
+        reader.autoModeReset();
+        reader.setAutoMode(AlienClass1Reader.ON);
+
 
         // Open a connection to the reader
         reader.open();
