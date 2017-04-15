@@ -12,13 +12,14 @@ public class RFIDCommunication {
     /**
      * Constructor
      */
-    public RFIDCommunication() throws AlienReaderException {
+    public RFIDCommunication(String connect) throws AlienReaderException {
 
         AlienClass1Reader reader = new AlienClass1Reader();
 //  reader.setConnection("COM1");
 
         // To connect to a networked reader instead, use the following:
-        reader.setConnection("150.164.10.42", 23);
+        //reader.setConnection("150.164.10.42", 23);
+        reader.setConnection(connect, 23);
         reader.setUsername("alien");
         reader.setPassword("password");
 
@@ -57,7 +58,7 @@ public class RFIDCommunication {
      */
     public static final void main(String args[]){
         try {
-            new RFIDCommunication();
+            new RFIDCommunication("150.164.10.42");
         } catch(AlienReaderException e) {
             System.out.println("Error: " + e.toString());
         }
