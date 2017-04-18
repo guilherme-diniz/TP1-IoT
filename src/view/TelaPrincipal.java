@@ -1,44 +1,44 @@
 package view;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
+import java.awt.*;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
+import com.alien.enterpriseRFID.notify.MessageListenerService;
 import com.alien.enterpriseRFID.reader.AlienReaderException;
+import com.alien.enterpriseRFID.tags.Tag;
+import com.alienrfid.AutoMessageListener;
+import com.alienrfid.Common;
 import com.alienrfid.RFIDCommunication;
 
 import javax.swing.JButton;
-import javax.swing.JTextPane;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JTextField;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.JComboBox;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JTabbedPane;
 import javax.swing.JScrollPane;
-import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.JTable;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JDesktopPane;
-import javax.swing.JList;
-import javax.swing.AbstractListModel;
-import java.awt.GridLayout;
 import javax.swing.JLayeredPane;
 import javax.swing.SwingConstants;
 
 public class TelaPrincipal extends JFrame {
 
-	private JPanel contentPane;
+    private JPanel contentPane;
 	private String readerIP;
-	private JTable table_1;
-	private JTable table_2;
+	private JTable tableActiveMode;
+	private JTable tableAutoModel;
+
+	private RFIDCommunication rfid;
+
 	/**
 	 * Launch the application.
 	 */
@@ -73,30 +73,25 @@ public class TelaPrincipal extends JFrame {
 		comboBox.setModel(new DefaultComboBoxModel(new String[] {"150.164.10.41", "150.164.10.42"}));
 		comboBox.setToolTipText("");
 		comboBox.setBounds(318, 11, 116, 20);
-		comboBox.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JComboBox cb = (JComboBox)e.getSource();
-		        readerIP = (String)cb.getSelectedItem();
-		        System.out.println(readerIP);
-			}
-		});
+		comboBox.addActionListener(e -> {
+            JComboBox cb = (JComboBox)e.getSource();
+            readerIP = (String)cb.getSelectedItem();
+            System.out.println(readerIP);
+        });
 		
 		panel.add(comboBox);
 		
-		JButton button = new JButton("Confirma");
-		button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				
-				try {
-					 
-		            new RFIDCommunication(readerIP);
-		        } catch(AlienReaderException e2) {
-		            System.out.println("Error: " + e2.toString());
-		        }
-				
-			}
-		});
-		button.setBounds(440, 10, 75, 23);
+		JButton button = new JButton("Connect");
+		button.addActionListener(e -> {
+
+            try {
+               this.rfid = new RFIDCommunication(readerIP, "alien", "password");
+            } catch(AlienReaderException e2) {
+                System.out.println("Error: " + e2.toString());
+            }
+
+        });
+		button.setBounds(440, 10, 100, 23);
 		panel.add(button);
 		contentPane.setLayout(null);
 		contentPane.add(panel);
@@ -107,10 +102,10 @@ public class TelaPrincipal extends JFrame {
 		
 		JLayeredPane AutomateMode = new JLayeredPane();
 		tabbedPane.addTab("Automate Mode", null, AutomateMode, null);
-		
+
 		JButton button_1 = new JButton("Read");
 		button_1.setHorizontalTextPosition(SwingConstants.CENTER);
-		
+
 		JScrollPane scrollPane_1 = new JScrollPane();
 		GroupLayout gl_AutomateMode = new GroupLayout(AutomateMode);
 		gl_AutomateMode.setHorizontalGroup(
@@ -128,9 +123,9 @@ public class TelaPrincipal extends JFrame {
 					.addComponent(scrollPane_1, GroupLayout.PREFERRED_SIZE, 372, GroupLayout.PREFERRED_SIZE))
 		);
 		DefaultTableModel model = new DefaultTableModel();
-		table_2 = new JTable(model);
-		scrollPane_1.setViewportView(table_2);
-		table_2.setModel(new DefaultTableModel(
+		tableAutoModel = new JTable(model);
+		scrollPane_1.setViewportView(tableAutoModel);
+		tableAutoModel.setModel(new DefaultTableModel(
 				new Object[][]{
 				},
 				new String[]{
@@ -139,41 +134,100 @@ public class TelaPrincipal extends JFrame {
 				));
 		AutomateMode.setLayout(gl_AutomateMode);
 		
-		
 		JLayeredPane ActiveMode = new JLayeredPane();
 		tabbedPane.addTab("Active Mode", null, ActiveMode, null);
 		
 		JButton btnRead = new JButton("Read");
 		btnRead.setHorizontalTextPosition(SwingConstants.CENTER);
-		
+
+        JButton btnClear = new JButton("Clear");
+        btnClear.setHorizontalTextPosition(SwingConstants.CENTER);
+
+		JLabel readLabel = new JLabel();
+
 		JScrollPane scrollPane = new JScrollPane();
-		GroupLayout gl_ActiveMode = new GroupLayout(ActiveMode);
-		gl_ActiveMode.setHorizontalGroup(
-			gl_ActiveMode.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_ActiveMode.createSequentialGroup()
+		GroupLayout glActiveMode = new GroupLayout(ActiveMode);
+		glActiveMode.setHorizontalGroup(
+			glActiveMode.createParallelGroup(Alignment.LEADING)
+				.addGroup(glActiveMode.createSequentialGroup()
 					.addGap(409)
-					.addComponent(btnRead))
+                    .addComponent(btnRead)
+                    .addComponent(btnClear)
+                    .addComponent(readLabel))
 				.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 924, GroupLayout.PREFERRED_SIZE)
 		);
-		gl_ActiveMode.setVerticalGroup(
-			gl_ActiveMode.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_ActiveMode.createSequentialGroup()
-					.addComponent(btnRead)
+		glActiveMode.setVerticalGroup(
+			glActiveMode.createParallelGroup(Alignment.LEADING)
+				.addGroup(glActiveMode.createSequentialGroup()
+                    .addGroup(glActiveMode.createParallelGroup().addComponent(btnRead)
+                            .addComponent(btnClear)
+                            .addComponent(readLabel))
 					.addGap(11)
 					.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 372, GroupLayout.PREFERRED_SIZE))
 		);
 		
-		
-		DefaultTableModel model2 = new DefaultTableModel();
-		table_1 = new JTable(model2);
-		scrollPane.setViewportView(table_1);
-		table_1.setModel(new DefaultTableModel(
-				new Object[][]{
-				},
-				new String[]{
-					"ID","Discovered","Last Seen","Antenna","Reads"
-				}
-				));
-		ActiveMode.setLayout(gl_ActiveMode);
+
+		tableActiveMode = new JTable();
+		scrollPane.setViewportView(tableActiveMode);
+		ActiveMode.setLayout(glActiveMode);
+
+		//ACTIVE
+		btnRead.addActionListener(e -> {
+		    btnClear.doClick();
+		    this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		    if (this.rfid == null) {
+		        JOptionPane.showMessageDialog(this, "Connect to the reader first.");
+		        return;
+            }
+
+            try {
+                long t= System.currentTimeMillis();
+                long end = t+ Common.INTERVAL_MODE * 1000;
+                while(System.currentTimeMillis() < end) {
+                    Tag[] tags = this.rfid.read();
+                    if (tags == null) {
+                        continue;
+                    }
+                    for (Tag tag : tags) {
+                        if (Common.tagsMap.containsKey(tag.getTagID())) {
+                            Common.tagsMap.put(tag.getTagID(), Common.tagsMap.get(tag.getTagID()) + 1);
+                        } else {
+                            Common.tagsMap.put(tag.getTagID(), 1);
+                        }
+                    }
+                }
+                Common.readCount = this.rfid.getReadCount();
+                Common.setTableModel();
+                tableActiveMode.setModel(Common.tableModel);
+                readLabel.setText("Reads: " + this.rfid.getReadCount());
+                this.setCursor(Cursor.getDefaultCursor());
+            } catch (AlienReaderException e1) {
+                e1.printStackTrace();
+                this.setCursor(Cursor.getDefaultCursor());
+            }
+        });
+
+		btnClear.addActionListener(e -> {
+		    this.rfid.restart();
+		    Common.tagsMap.clear();
+		    readLabel.setText("");
+		    tableActiveMode.setModel(new DefaultTableModel());
+        });
+
+		//AUTOMATE
+        button_1.addActionListener(e -> {
+            try {
+                Common.tagsMap.clear();
+                this.rfid.setAutomateMode(Common.AUTOMATE_IP);
+                MessageListenerService service = new MessageListenerService(4000);
+                service.setMessageListener(new AutoMessageListener());
+                service.startService();
+                tableAutoModel.setModel(Common.tableModel);
+            } catch (AlienReaderException | IOException e1) {
+                e1.printStackTrace();
+            }
+        });
 	}
+
+
 }

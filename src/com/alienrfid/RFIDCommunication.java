@@ -9,59 +9,46 @@ import com.alien.enterpriseRFID.tags.Tag;
  */
 public class RFIDCommunication {
 
+    private AlienClass1Reader reader;
+    private long readCount = 0;
+
     /**
      * Constructor
      */
-    public RFIDCommunication(String connect) throws AlienReaderException {
+    public RFIDCommunication(String connect, String user, String password) throws AlienReaderException {
+        this.reader = new AlienClass1Reader();
 
-        AlienClass1Reader reader = new AlienClass1Reader();
-//  reader.setConnection("COM1");
-
-        // To connect to a networked reader instead, use the following:
-        //reader.setConnection("150.164.10.42", 23);
         reader.setConnection(connect, 23);
         reader.setUsername("alien");
         reader.setPassword("password");
+        reader.open();
+    }
 
-        reader.setNotifyAddress("150.164.0.249:4000");
-        reader.setNotifyTime(30);
+    public void setAutomateMode(String notAddr) throws AlienReaderException {
+        reader.setNotifyAddress(notAddr + ":4000");
+        reader.setNotifyFormat(AlienClass1Reader.XML_FORMAT);
+        reader.setNotifyTime(15000);
         reader.autoModeReset();
         reader.setAutoMode(AlienClass1Reader.ON);
+        reader.setNotifyTrigger("TrueFalse"); // Notify whether there's a tag or not
+        reader.setNotifyMode(AlienClass1Reader.ON);
 
+    }
 
-        // Open a connection to the reader
-        reader.open();
+    public Tag[] read() throws AlienReaderException {
+        readCount++;
+        return  reader.getTagList();
+    }
 
-        // Ask the reader to read tags and print them
-        Tag tagList[] = reader.getTagList();
-        if (tagList == null) {
-            System.out.println("No Tags Found");
-        } else {
-            System.out.println("Tag(s) found:");
-            for (int i=0; i<tagList.length; i++) {
-                Tag tag = tagList[i];
-                System.out.println("ID:" + tag.getTagID() +
-                        ", Discovered:" + tag.getDiscoverTime() +
-                        ", Last Seen:" + tag.getRenewTime() +
-                        ", Antenna:" + tag.getAntenna() +
-                        ", Reads:" + tag.getRenewCount()
-                );
-            }
-        }
+    public void restart() {
+        readCount = 0;
+    }
 
-        // Close the connection
+    public void closer() {
         reader.close();
     }
 
-    /**
-     * Main
-     */
-    public static final void main(String args[]){
-        try {
-            new RFIDCommunication("150.164.10.42");
-        } catch(AlienReaderException e) {
-            System.out.println("Error: " + e.toString());
-        }
+    public long getReadCount() {
+        return readCount;
     }
-
 }

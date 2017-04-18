@@ -79,43 +79,39 @@ public class TelaLogin extends JFrame {
 		
 		JCheckBox PassCheckBox = new JCheckBox("Show/Hide password");
 		PassCheckBox.setHorizontalAlignment(SwingConstants.CENTER);
-		PassCheckBox.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if(PassCheckBox.isSelected())
-				{
-					password.setEchoChar((char)0);
-				}
-				else
-				{
-					password.setEchoChar('*');
-				}
-			}
-		});
+		PassCheckBox.addActionListener(e -> {
+            if(PassCheckBox.isSelected())
+            {
+                password.setEchoChar((char)0);
+            }
+            else
+            {
+                password.setEchoChar('*');
+            }
+        });
 		PassCheckBox.setBounds(6, 97, 246, 23);
 		contentPane.add(PassCheckBox);
 		
 		
 		JButton btnLogin = new JButton("Login");
 		btnLogin.setBounds(89, 127, 86, 23);
-		btnLogin.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				
-				String userText = username.getText();
-				String passText = password.getText();
-				
-				if(userText.equals("alien") && passText.equals("password"))
-				{
-					TelaPrincipal principal = new TelaPrincipal();
-					principal.show();
-					dispose();
-				}
-				else
-				{
-					JOptionPane.showMessageDialog(null, "Invalid username or password");
-					
-				}
-			}
-		});
+		btnLogin.addActionListener(arg0 -> {
+
+            String userText = username.getText();
+            String passText = password.getText();
+
+            if(userText.equals("alien") && passText.equals("password"))
+            {
+                TelaPrincipal principal = new TelaPrincipal();
+                principal.show();
+                dispose();
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(null, "Invalid username or password");
+
+            }
+        });
 		contentPane.add(btnLogin);
 		
 		

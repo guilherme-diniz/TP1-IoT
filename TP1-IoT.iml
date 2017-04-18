@@ -10,10 +10,14 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/Downloads/TP1_RFID_DevKit_Alien_2017-1/Software APIs/Java/jars/AlienRFID.jar!/" />
+          <root url="file://$MODULE_DIR$/jars" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/jars" />
+        </SOURCES>
+        <jarDirectory url="file://$MODULE_DIR$/jars" recursive="false" />
+        <jarDirectory url="file://$MODULE_DIR$/jars" recursive="false" type="SOURCES" />
       </library>
     </orderEntry>
   </component>
